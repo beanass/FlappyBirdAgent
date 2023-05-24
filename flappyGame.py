@@ -1,7 +1,6 @@
 import pygame, sys, random
-
+import numpy as np
 import gym_flappyBird.envs.flappyBird_env
-
 
 class FlappyBirdGame:
 
@@ -224,7 +223,28 @@ class FlappyBirdGame:
         # Return the game state
         return self.get_game_state(), self.calculate_reward(), self.is_game_over()
 
+def basic_policy(observation):
+    bird_position = observation['bird_position']
+    pipe_positions = observation['pipe_positions']
 
+    if pipe_positions:
+        top_pipe_y = pipe_positions[0][1]
+        bottom_pipe_y = pipe_positions[1][1]
+
+        if bird_position[1] < top_pipe_y:
+            # If the bird is above the top pipe, take action to flap (1)
+            action = 1
+        elif bird_position[1] > bottom_pipe_y:
+            # If the bird is below the bottom pipe, take action to stay still (0)
+            action = 0
+        else:
+            # If the bird is between the top and bottom pipes, take action to stay still (0)
+            action = 0
+    else:
+        # If there are no pipes, take no action (0)
+        action = 0
+
+    return action
 def main():
     #flappyBirdGame = FlappyBirdGame()
     #flappyBirdGame.play()
@@ -232,17 +252,24 @@ def main():
     env = gym_flappyBird.envs.flappyBird_env.FlappyBirdEnv(game)
     observation = env.reset()
     #print(observation)
+    action = env.action_space.sample()
 
     while True:
+    #i = 0
+    #for i in range(300):
         # Choose an action using the Gym environment
         #action = env.action_space.sample()
-        print(env.action_space.sample())
-        action = env.action_space.sample()
+        #print(env.action_space.sample())
+        #action = env.action_space.sample()
+
+        #action = basic_policy(observation)
         print('action : ', action)
         # Perform the action in the environment and get the next observation, reward, done, and info
-        next_observation, reward, done, info = env.step(action)
-        print(next_observation)
-        print(done)
+        observation, reward, done, info = env.step(action)
+        action = basic_policy(observation)
+        #action = relu_policy(observation)
+        #print(next_observation)
+        #print(done)
         # Render the game
         env.render()
 
@@ -254,7 +281,7 @@ def main():
             # Reset the environment
             observation = env.reset()
 
-    FlappyBirdGame.close()
+    game.close()
 
 
 if __name__ == "__main__":

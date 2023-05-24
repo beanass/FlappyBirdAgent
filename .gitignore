@@ -1,0 +1,9 @@
+# ignore all logs
+*.log
+.env
+venv/
+__pycache__/
+clean/
+
+.DS_Store
+.idea
